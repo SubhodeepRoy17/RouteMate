@@ -1,0 +1,100 @@
+# Dependency directories
+node_modules/
+.next/
+.out/
+
+# Build files
+dist/
+build/
+
+# Environment variables
+.env*.local
+.env
+.env.development
+.env.test
+.env.production
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local development
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production cache
+.cache/
+
+# Next.js specific
+.next/cache/
+
+# Dependency lock files (choose one based on your package manager)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+
+# Local development files
+.turbo/
+
+# Logs
+logs/
+*.log
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Optional
+# If you're using Prisma
+/prisma/migrations/
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# If you're using Docker
+docker-compose.yml
+docker-compose.override.yml
+
+# If you're using Jest
+/jest-report/
+/coverage/
+
+# If you're using Storybook
+.storybook/
+storybook-static/
+
+# If you're using Cypress
+/cypress/screenshots/
+/cypress/videos/
+
+# If you're using Playwright
+/playwright-report/
+/playwright/.cache/
+/test-results/
+
+# If you're using ESLint cache
+.eslintcache
+
+# If you're using Prettier cache
+.prettiercache

@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,25 +12,28 @@ import { Eye, EyeOff, Loader2, CheckCircle, ArrowLeft } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { AnimatedLogo } from "@/components/animated-logo"
 
-export function LoginPage() {
+export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
-  const { login, setCurrentPage } = useAuth()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
-    setSuccessMessage("")
     setIsLoading(true)
 
     try {
       const result = await login(email, password)
-      if (!result.success) {
+      if (result.success) {
+        setIsRedirecting(true)
+      } else {
         setError(result.message || "Login failed. Please try again.")
       }
     } catch (err) {
@@ -40,20 +43,23 @@ export function LoginPage() {
     }
   }
 
-  // Check for success message from signup
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const message = urlParams.get("message")
     if (message) {
       setSuccessMessage(decodeURIComponent(message))
-      // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
 
+  if (isRedirecting) {
+    router.push("/dashboard")
+    return null
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Background elements remain the same */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -62,7 +68,11 @@ export function LoginPage() {
 
       <Card className="w-full max-w-md relative z-10 shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
         <CardHeader className="space-y-1 text-center pb-8">
-          <Button variant="ghost" className="absolute top-4 left-4 p-2" onClick={() => setCurrentPage("home")}>
+          <Button 
+            variant="ghost" 
+            className="absolute top-4 left-4 p-2" 
+            onClick={() => router.push('/')}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
 
@@ -164,7 +174,7 @@ export function LoginPage() {
           <Button
             variant="outline"
             className="w-full h-12 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold transition-all duration-200 transform hover:scale-[1.02]"
-            onClick={() => setCurrentPage("signup")}
+            onClick={() => router.push('/signup')}
             disabled={isLoading}
           >
             Create New Account
