@@ -108,7 +108,7 @@ export default function SignUpPage() {
           </Button>
 
           <div className="flex items-center justify-center mb-4">
-            <AnimatedLogo size="lg" />
+            <AnimatedLogo />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Create Account

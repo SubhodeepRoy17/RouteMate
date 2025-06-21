@@ -14,15 +14,16 @@ interface User {
 }
 
 interface AuthContextType {
-  isAuthenticated: boolean
-  user: User | null
-  activePage: string
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>
-  logout: () => Promise<void>
-  signInWithGoogle: () => Promise<{ success: boolean; message?: string }>
-  signInWithGithub: () => Promise<{ success: boolean; message?: string }>
-  setActivePage: (page: string) => void
+  isAuthenticated: boolean;
+  user: User | null;
+  activePage: string;
+  isLoading: boolean; // Added missing property
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  logout: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ success: boolean; message?: string }>;
+  signInWithGithub: () => Promise<{ success: boolean; message?: string }>;
+  setActivePage: (page: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -51,6 +52,7 @@ export function AuthProvider({
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [mockUsers, setMockUsers] = useState<User[]>(getMockUsers())
   const [isInitialized, setIsInitialized] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle authentication state
   useEffect(() => {
@@ -202,15 +204,18 @@ export function AuthProvider({
   };
 
   const logout = async () => {
+    setIsLoading(true)
     try {
-      await signOut({ redirect: false })
+      await signOut({ callbackUrl: '/' }) // Explicit redirect to home
       setUser(null)
       setIsAuthenticated(false)
       localStorage.removeItem("routemate_user")
-      router.push('/')
+      router.push('/') // Force redirect to home
     } catch (error) {
       console.error("Logout failed:", error)
-      router.push('/')
+      router.push('/') // Ensure redirect even on error
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -220,6 +225,7 @@ export function AuthProvider({
         isAuthenticated,
         user,
         activePage,
+        isLoading,
         login,
         signup,
         logout,

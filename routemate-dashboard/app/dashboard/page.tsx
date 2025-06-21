@@ -113,7 +113,7 @@ export default function DashboardPage() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full flex-col">
-        <TopNavbar user={user} onLogout={logout} />
+        <TopNavbar />
         <div className="flex flex-1 overflow-hidden">
           <AppSidebar />
           <SidebarInset>

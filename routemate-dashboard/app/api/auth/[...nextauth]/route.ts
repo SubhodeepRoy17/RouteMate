@@ -1,5 +1,5 @@
 // app/api/auth/[...nextauth]/route.ts
-import NextAuth, { type Session, type DefaultUser } from "next-auth"
+import NextAuth, { type Session, type DefaultUser, type SessionStrategy } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GithubProvider from "next-auth/providers/github"
 
@@ -44,31 +44,31 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: { user: ExtendedUser; account: any }) {
       if (account?.provider === "github") return true
       if (user.email?.endsWith('@heritageit.edu.in')) return true
       return '/auth/error?error=AccessDenied'
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       // 1. Force dashboard redirect after auth callbacks
-      if (url.includes('/api/auth/callback') || url.includes('/auth/signin')) {
+      if (url.includes('/api/auth/callback')) {
         return `${baseUrl}/dashboard`
       }
       
-      // 2. Allow explicit callbackUrls
-      if (url.startsWith('/dashboard')) return `${baseUrl}${url}`
+      // 2. Allow explicit callbackUrls from signIn()
+      if (url.startsWith('/')) return `${baseUrl}${url}`
       
-      // 3. Fallback for other cases
-      return url.startsWith('/') ? `${baseUrl}/dashboard` : baseUrl
+      // 3. Default to home page for all other cases
+      return baseUrl
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: any }) {
       if (session.user) {
         session.user.id = token.sub || token.id || ''
         session.user.role = token.role || 'user'
       }
       return session
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account }: { token: any; user?: ExtendedUser; account?: any }) {
       if (user) {
         token.id = user.id
         token.role = user.role || 'user'
@@ -82,10 +82,31 @@ export const authOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
+    signOut: "/" // Redirect to home after sign out
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
     maxAge: 30 * 24 * 60 * 60,
+  },
+  events: {
+    async signOut({  }) {
+    // Clear NextAuth session cookies
+    if (typeof window !== 'undefined') {
+      document.cookie = `__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure=${process.env.NODE_ENV === 'production'}; sameSite=lax`
+    }
+    
+    // Clear any stored user data
+    localStorage.removeItem('routemate_user')
+    
+    // Clear auth-related session storage
+    sessionStorage.removeItem('redirectPath')
+    sessionStorage.removeItem('authState')
+    
+    // For debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('User signed out - cleaned all auth data')
+    }
+  }
   },
   debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
